@@ -15,6 +15,9 @@ const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
 });
 
+// Storage for active rain embeds
+const activeRainEmbeds = new Map();
+
 // Function to read and write data to a file for storage purposes
 function readStorage() {
     try {
@@ -96,49 +99,63 @@ async function checkRain() {
         }
 
         // Load stored data from storage.json
-        const { currentRainId, messageSent, embedMessageId } = readStorage();
+        const { currentRainId, messageSent } = readStorage();
 
-        if (rain && rain.active && rain.id !== currentRainId) {
-            const { id, prize, host, created, duration } = rain;
-            const endTime = new Date(created + duration);
+        if (rain && rain.active) {
+            if (rain.id !== currentRainId) {
+                // A new rain event is detected
+                const { id, prize, host, created, duration } = rain;
+                const endTime = new Date(created + duration);
 
-            // Fetch the host's avatar
-            const avatarUrl = await fetchRobloxAvatar(host);
-            
-            // Create the embed for the new rain event
-            const embed = new EmbedBuilder()
-                .setTitle(`**Active Rain**`)
-                .setColor(0x00ffff)
-                .setTimestamp()
-                .setThumbnail(avatarUrl)
-                .addFields(
-                    { name: '**Amount:**', value: `⏣${prize.toLocaleString()}`, inline: true },
-                    { name: '**Participants:**', value: `0`, inline: true },
-                    { name: '**Robux each:**', value: `⏣${(0).toLocaleString()}`, inline: true },
-                    { name: '**Host:**', value: host, inline: false },
-                    { name: '**Ends in:**', value: `<t:${Math.floor(endTime / 1000)}:R>`, inline: false },
-                    { name: '\u200B', value: '[Click to Join Rain](https://bloxflip.com/)', inline: false }
-                )
-                .setFooter({ text: "Credits to: BloxTools" });
+                // Fetch the host's avatar
+                const avatarUrl = await fetchRobloxAvatar(host);
 
-            // Add the role ping to the embed
-            embed.setDescription(`<@&1293774007224762471>`);
+                // Create the embed for the new rain event
+                const embed = new EmbedBuilder()
+                    .setTitle(`**Active Rain**`)
+                    .setColor(0x00ffff)
+                    .setTimestamp()
+                    .setThumbnail(avatarUrl)
+                    .addFields(
+                        { name: '**Amount:**', value: `⏣${prize.toLocaleString()}`, inline: true },
+                        { name: '**Participants:**', value: `0`, inline: true },
+                        { name: '**Robux each:**', value: `⏣${(0).toLocaleString()}`, inline: true },
+                        { name: '**Host:**', value: host, inline: false },
+                        { name: '**Ends in:**', value: `<t:${Math.floor(endTime / 1000)}:R>`, inline: false },
+                        { name: '\u200B', value: '[Click to Join Rain](https://bloxflip.com/)', inline: false }
+                    )
+                    .setFooter({ text: "Credits to: BloxTools" });
 
-            // Send embed message to the specified channel
-            const channel = await client.channels.fetch(CHANNEL_ID);
-            const message = await channel.send({ embeds: [embed] });
+                // Add the role ping to the embed
+                embed.setDescription(`<@&1293774007224762471>`);
 
-            console.log("New notification sent.");
+                // Send embed message to the specified channel
+                const channel = await client.channels.fetch(CHANNEL_ID);
+                const message = await channel.send({ embeds: [embed] });
 
-            // Update storage.json with the current rain details
-            writeStorage({
-                currentRainId: id,
-                messageSent: true,
-                embedMessageId: message.id, // Save the embed message ID for future updates
-            });
+                console.log("New notification sent.");
 
-            // Start interval to update the embed with participant count and Robux per player
-            setInterval(() => updateEmbed(channel, message.id, prize), 2 * 1000); // Update every 2 seconds
+                // Update storage.json with the current rain details
+                writeStorage({
+                    currentRainId: id,
+                    messageSent: true,
+                    embedMessageId: message.id, // Save the embed message ID for future updates
+                });
+
+                // If there is a previous rain event, remove it from activeRainEmbeds
+                if (activeRainEmbeds.has(currentRainId)) {
+                    const previousMessageId = activeRainEmbeds.get(currentRainId);
+                    const previousMessage = await channel.messages.fetch(previousMessageId);
+                    await previousMessage.delete(); // Delete the previous message
+                    activeRainEmbeds.delete(currentRainId); // Remove from map
+                }
+
+                // Add the new rain event to the map
+                activeRainEmbeds.set(id, message.id);
+
+                // Start interval to update the embed with participant count and Robux per player
+                setInterval(() => updateEmbed(channel, message.id, prize), 2 * 1000); // Update every 2 seconds
+            }
         } else if (!rain.active && messageSent) {
             // Reset the messageSent flag in storage.json
             writeStorage({
