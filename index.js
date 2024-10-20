@@ -116,23 +116,26 @@ async function checkRain() {
             
             // Create the embed for the new rain event
             const embed = new EmbedBuilder()
-                .setTitle(**Active Rain**)
+                .setTitle(`**Active Rain**`)
                 .setColor(0x00ffff)
                 .setTimestamp()
                 .setThumbnail(avatarUrl) // Set the avatar URL as thumbnail
                 .addFields(
-                    { name: '**Amount:**', value: ⏣${prize.toLocaleString()}, inline: true },
-                    { name: '**Participants:**', value: 0, inline: true }, // Placeholder for participant count
-                    { name: '**Robux each:**', value: ⏣${(0).toLocaleString()}, inline: true }, // Placeholder for Robux per player
+                    { name: '**Amount:**', value: `⏣${prize.toLocaleString()}`, inline: true },
+                    { name: '**Participants:**', value: `0`, inline: true }, // Placeholder for participant count
+                    { name: '**Robux each:**', value: `⏣${(0).toLocaleString()}`, inline: true }, // Placeholder for Robux per player
                     { name: '**Host:**', value: host, inline: false },
-                    { name: '**Ends in:**', value: <t:${Math.floor(endTime / 1000)}:R>, inline: false },
+                    { name: '**Ends in:**', value: `<t:${Math.floor(endTime / 1000)}:R>`, inline: false },
                     { name: '\u200B', value: '[Click to Join Rain](https://bloxflip.com/)', inline: false } // Link to BloxFlip
                 )
-                .setFooter({ text: "Credits to: BloxTools" }); // Add credits to the footer
+                .setFooter({ text: "Credits to: BloxTools" }) // Add credits to the footer
+
+// Add the role ping to the embed
+embed.setDescription(`<@&1293774007224762471>`);
+
 
             // Send embed message to the specified channel
             const channel = await client.channels.fetch(CHANNEL_ID);
-            await channel.send(<@&1293774007224762471>); // Ping the role
             const message = await channel.send({ embeds: [embed] });
 
             console.log("New notification sent.");
@@ -145,7 +148,7 @@ async function checkRain() {
             });
 
             // Start interval to update the embed with participant count and Robux per player
-            setInterval(() => updateEmbed(channel, message.id, prize), 1 * 1000); // Update every 10 seconds
+            setInterval(() => updateEmbed(channel, message.id, prize), 3 * 1000); // Update every 3 seconds
         } else if (!rain.active && messageSent) {
             // Reset the messageSent flag in storage.json
             writeStorage({
@@ -201,8 +204,8 @@ async function updateEmbed(channel, messageId, totalPrize) {
 // Event when the bot is ready
 client.on('ready', () => {
     console.log(Logged in as ${client.user.tag});
-    // Run the checkRain function every 1 seconds
-    setInterval(checkRain, 1 * 1000);
+    // Run the checkRain function every 5 seconds
+    setInterval(checkRain, 5 * 1000);
     // Run once on start
     checkRain();
 });
