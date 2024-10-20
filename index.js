@@ -4,7 +4,7 @@ const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const keep_alive = require('./keep_alive.js');
 
 // Replace these with your actual values
-const DISCORD_BOT_TOKEN = 'process.env.TOKEN'; // Replace with your actual bot token
+const DISCORD_BOT_TOKEN = process.env.TOKEN; // Access the bot token directly
 const CHANNEL_ID = '1293775455329062922'; // Your channel ID here
 
 // Toggle for using mock data
@@ -88,7 +88,6 @@ async function fetchRobloxAvatar(username, retries = 3) {
     return null; // Return null if user is not found after retries
 }
 
-
 // Function to check for rain events
 async function checkRain() {
     const apiUrl = "https://api.bloxflip.com/chat/history";
@@ -116,21 +115,20 @@ async function checkRain() {
             const avatarUrl = await fetchRobloxAvatar(host);
             
             // Create the embed for the new rain event
-	    const embed = new EmbedBuilder()
-    	    .setTitle(`**Active Rain**`)
-    	    .setColor(0x00ffff)
-    	    .setTimestamp()
-    	    .setThumbnail(avatarUrl) // Set the avatar URL as thumbnail
-    	    .addFields(
-    	        { name: '**Amount:**', value: `⏣${prize.toLocaleString()}`, inline: true },
-    	        { name: '**Participants:**', value: `0`, inline: true }, // Placeholder for participant count
-    	        { name: '**Robux each:**', value: `⏣${(0).toLocaleString()}`, inline: true }, // Placeholder for Robux per player
-    	        { name: '**Host:**', value: host, inline: false },
-    	        { name: '**Ends in:**', value: `<t:${Math.floor(endTime / 1000)}:R>`, inline: false },
-    	        { name: '\u200B', value: '[Click to Join Rain](https://bloxflip.com/)', inline: false } // Link to BloxFlip
-   	    )
-  	    .setFooter({ text: "Credits to: BloxTools" }); // Add credits to the footer
-
+            const embed = new EmbedBuilder()
+                .setTitle(`**Active Rain**`)
+                .setColor(0x00ffff)
+                .setTimestamp()
+                .setThumbnail(avatarUrl) // Set the avatar URL as thumbnail
+                .addFields(
+                    { name: '**Amount:**', value: `⏣${prize.toLocaleString()}`, inline: true },
+                    { name: '**Participants:**', value: `0`, inline: true }, // Placeholder for participant count
+                    { name: '**Robux each:**', value: `⏣${(0).toLocaleString()}`, inline: true }, // Placeholder for Robux per player
+                    { name: '**Host:**', value: host, inline: false },
+                    { name: '**Ends in:**', value: `<t:${Math.floor(endTime / 1000)}:R>`, inline: false },
+                    { name: '\u200B', value: '[Click to Join Rain](https://bloxflip.com/)', inline: false } // Link to BloxFlip
+                )
+                .setFooter({ text: "Credits to: BloxTools" }); // Add credits to the footer
 
             // Send embed message to the specified channel
             const channel = await client.channels.fetch(CHANNEL_ID);
