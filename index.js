@@ -183,20 +183,29 @@ async function updateEmbed(channel, messageId, totalPrize) {
             const robuxPerPlayer = participants > 0 ? (totalPrize / participants).toLocaleString() : '0';
 
             // Fetch the existing message to update
-            const message = await channel.messages.fetch(messageId);
+            try {
+                const message = await channel.messages.fetch(messageId);
 
-            // Update the embed
-            const embed = message.embeds[0];
-            embed.fields[1].value = `${participants.toLocaleString()}`; // Update participant count
-            embed.fields[2].value = `⏣${robuxPerPlayer}`; // Update Robux per player
+                // Update the embed
+                const embed = message.embeds[0];
+                embed.fields[1].value = `${participants.toLocaleString()}`; // Update participant count
+                embed.fields[2].value = `⏣${robuxPerPlayer}`; // Update Robux per player
 
-            // Edit the message with the updated embed
-            await message.edit({ embeds: [embed] });
+                // Edit the message with the updated embed
+                await message.edit({ embeds: [embed] });
+            } catch (error) {
+                console.error("Error fetching or updating embed message:", error);
+                // Reset the embedMessageId in storage if the message is not found
+                const storageData = readStorage();
+                storageData.embedMessageId = null; // Reset message ID
+                writeStorage(storageData);
+            }
         }
     } catch (error) {
         console.error("Error updating embed:", error);
     }
 }
+
 
 // Event when the bot is ready
 client.on('ready', () => {
