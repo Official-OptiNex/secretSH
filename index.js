@@ -3,7 +3,7 @@ import fs from "fs";
 import { Client, GatewayIntentBits, EmbedBuilder } from 'discord.js';
 
 // Replace these with your actual values
-const DISCORD_BOT_TOKEN = 'MTI5NjcwNjc3MjE5MDQ5NDc2MQ.GTDzhm.UZvBXd-JAaDffA3UIITY9fWknIK3bzZRvlY4TQ'; // Replace with your actual bot token
+const DISCORD_BOT_TOKEN = 'process.env.TOKEN'; // Replace with your actual bot token
 const CHANNEL_ID = '1293775455329062922'; // Your channel ID here
 
 // Toggle for using mock data
