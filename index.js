@@ -145,7 +145,7 @@ async function checkRain() {
             });
 
             // Start interval to update the embed with participant count and Robux per player
-            setInterval(() => updateEmbed(channel, message.id, prize), 1 * 1000); // Update every 10 seconds
+            setInterval(() => updateEmbed(channel, message.id, prize), 2 * 1000); // Update every 2 seconds
         } else if (!rain.active && messageSent) {
             // Reset the messageSent flag in storage.json
             writeStorage({
@@ -201,8 +201,8 @@ async function updateEmbed(channel, messageId, totalPrize) {
 // Event when the bot is ready
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
-    // Run the checkRain function every 1 seconds
-    setInterval(checkRain, 1 * 1000);
+    // Run the checkRain function every 3 seconds
+    setInterval(checkRain, 3 * 1000);
     // Run once on start
     checkRain();
 });
