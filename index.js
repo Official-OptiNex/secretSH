@@ -204,8 +204,8 @@ async function updateEmbed(channel, messageId, totalPrize) {
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
     console.log(`${client.user.tag} Is now checking for BloxFlip rain events every 5 sconds, and updating any rain embeds every 2 seconds`);
-    // Run the checkRain function every 5 seconds
-    setInterval(checkRain, 5 * 1000);
+    // Run the checkRain function every 7 seconds
+    setInterval(checkRain, 7 * 1000);
     // Run once on start
     checkRain();
 });
