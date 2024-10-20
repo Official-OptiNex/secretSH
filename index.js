@@ -53,7 +53,7 @@ function readMockRainData() {
 async function fetchRobloxAvatar(username, retries = 3) {
     try {
         // Step 1: Get the user's ID based on the username
-        const userIdResponse = await fetch(https://users.roblox.com/v1/users/search?keyword=${username});
+        const userIdResponse = await fetch(`https://users.roblox.com/v1/users/search?keyword=${username}`);
         const userIdData = await userIdResponse.json();
 
         // Ensure a valid user is found
@@ -61,13 +61,13 @@ async function fetchRobloxAvatar(username, retries = 3) {
             const userId = userIdData.data[0].id;
 
             // Step 2: Get the user's profile picture using the userId
-            const pfpResponse = await fetch(https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false);
+            const pfpResponse = await fetch(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`);
             const pfpData = await pfpResponse.json();
 
             // Ensure a valid profile picture URL is found
             if (pfpData.data && pfpData.data.length > 0) {
                 const profilePictureUrl = pfpData.data[0].imageUrl;
-                console.log(Profile picture URL for ${username}: ${profilePictureUrl});
+                console.log(`Profile picture URL for ${username}: ${profilePictureUrl}`);
                 return profilePictureUrl;
             } else {
                 console.error("Failed to retrieve profile picture.");
@@ -80,7 +80,7 @@ async function fetchRobloxAvatar(username, retries = 3) {
         
         // Retry logic
         if (retries > 0) {
-            console.log(Retrying... Attempts left: ${retries});
+            console.log(`Retrying... Attempts left: ${retries}`);
             await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retrying
             return fetchRobloxAvatar(username, retries - 1);
         }
@@ -128,11 +128,10 @@ async function checkRain() {
                     { name: '**Ends in:**', value: `<t:${Math.floor(endTime / 1000)}:R>`, inline: false },
                     { name: '\u200B', value: '[Click to Join Rain](https://bloxflip.com/)', inline: false } // Link to BloxFlip
                 )
-                .setFooter({ text: "Credits to: BloxTools" }) // Add credits to the footer
+                .setFooter({ text: "Credits to: BloxTools" }); // Add credits to the footer
 
-// Add the role ping to the embed
-embed.setDescription(`<@&1293774007224762471>`);
-
+            // Add the role ping to the embed
+            embed.setDescription(`<@&1293774007224762471>`);
 
             // Send embed message to the specified channel
             const channel = await client.channels.fetch(CHANNEL_ID);
@@ -190,8 +189,8 @@ async function updateEmbed(channel, messageId, totalPrize) {
 
             // Update the embed
             const embed = message.embeds[0];
-            embed.fields[1].value = ${participants.toLocaleString()}; // Update participant count
-            embed.fields[2].value = ⏣${robuxPerPlayer}; // Update Robux per player
+            embed.fields[1].value = `${participants.toLocaleString()}`; // Update participant count
+            embed.fields[2].value = `⏣${robuxPerPlayer}`; // Update Robux per player
 
             // Edit the message with the updated embed
             await message.edit({ embeds: [embed] });
@@ -204,7 +203,6 @@ async function updateEmbed(channel, messageId, totalPrize) {
 // Event when the bot is ready
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
-    console.log(`Checking for rain every 5 seconds, updating rain embeds every 3 seconds | BOT IS ONLINE!!!`);
     // Run the checkRain function every 5 seconds
     setInterval(checkRain, 5 * 1000);
     // Run once on start
