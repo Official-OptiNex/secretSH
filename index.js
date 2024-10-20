@@ -147,7 +147,7 @@ async function checkRain() {
             });
 
             // Start interval to update the embed with participant count and Robux per player
-            setInterval(() => updateEmbed(channel, message.id, prize), 3 * 1000); // Update every 3 seconds
+            setInterval(() => updateEmbed(channel, message.id, prize), 2 * 1000); // Update every 2 seconds
         } else if (!rain.active && messageSent) {
             // Reset the messageSent flag in storage.json
             writeStorage({
@@ -203,6 +203,7 @@ async function updateEmbed(channel, messageId, totalPrize) {
 // Event when the bot is ready
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
+    console.log(`${client.user.tag} Is now checking for BloxFlip rain events every 5 sconds, and updating any rain embeds every 2 seconds`);
     // Run the checkRain function every 5 seconds
     setInterval(checkRain, 5 * 1000);
     // Run once on start
