@@ -203,7 +203,8 @@ async function updateEmbed(channel, messageId, totalPrize) {
 
 // Event when the bot is ready
 client.on('ready', () => {
-    console.log(Logged in as ${client.user.tag});
+    console.log(`Logged in as ${client.user.tag}`);
+    console.log(`Checking for rain every 5 seconds, updating rain embeds every 3 seconds | BOT IS ONLINE!!!`);
     // Run the checkRain function every 5 seconds
     setInterval(checkRain, 5 * 1000);
     // Run once on start
