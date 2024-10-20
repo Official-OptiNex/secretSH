@@ -1,7 +1,8 @@
-import fetch from "node-fetch";
-import fs from "fs";
-import { Client, GatewayIntentBits, EmbedBuilder } from 'discord.js';
+const fetch = require('node-fetch');
+const fs = require('fs');
+const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const keep_alive = require('./keep_alive.js');
+
 // Replace these with your actual values
 const DISCORD_BOT_TOKEN = 'process.env.TOKEN'; // Replace with your actual bot token
 const CHANNEL_ID = '1293775455329062922'; // Your channel ID here
