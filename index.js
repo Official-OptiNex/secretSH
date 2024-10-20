@@ -60,13 +60,13 @@ function readMockRainData() {
 // Fetch Roblox avatar URL with caching to reduce redundant requests
 async function fetchRobloxAvatar(username, retries = 3) {
     try {
-        const userIdResponse = await fetch(`https://users.roblox.com/v1/users/search?keyword=${username}`);
+        const userIdResponse = await fetch(https://users.roblox.com/v1/users/search?keyword=${username});
         const userIdData = await userIdResponse.json();
 
         if (userIdData.data && userIdData.data.length > 0) {
             const userId = userIdData.data[0].id;
 
-            const pfpResponse = await fetch(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`);
+            const pfpResponse = await fetch(https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false);
             const pfpData = await pfpResponse.json();
 
             if (pfpData.data && pfpData.data.length > 0) {
@@ -113,21 +113,21 @@ async function checkRain() {
             const avatarUrl = await fetchRobloxAvatar(host);
 
             const embed = new EmbedBuilder()
-                .setTitle(`**Active Rain**`)
+                .setTitle(**Active Rain**)
                 .setColor(0x00ffff)
                 .setTimestamp()
                 .setThumbnail(avatarUrl)
                 .addFields(
-                    { name: '**Amount:**', value: `⏣${prize.toLocaleString()}`, inline: true },
-                    { name: '**Participants:**', value: `0`, inline: true },
-                    { name: '**Robux each:**', value: `⏣0`, inline: true },
+                    { name: '**Amount:**', value: ⏣${prize.toLocaleString()}, inline: true },
+                    { name: '**Participants:**', value: 0, inline: true },
+                    { name: '**Robux each:**', value: ⏣0, inline: true },
                     { name: '**Host:**', value: host, inline: false },
-                    { name: '**Ends in:**', value: `<t:${Math.floor(endTime / 1000)}:R>`, inline: false },
+                    { name: '**Ends in:**', value: <t:${Math.floor(endTime / 1000)}:R>, inline: false },
                     { name: '\u200B', value: '[Click to Join Rain](https://bloxflip.com/)', inline: false }
                 )
                 .setFooter({ text: "Credits to: BloxTools" });
 
-            embed.setDescription(`<@&1293774007224762471>`);
+            embed.setDescription(<@&1293774007224762471>);
 
             const channel = await client.channels.fetch(CHANNEL_ID);
             const message = await channel.send({ embeds: [embed] });
@@ -138,7 +138,13 @@ async function checkRain() {
                 embedMessageId: message.id,
             });
 
-            setInterval(() => updateEmbed(channel, message.id, prize), 1500);
+            const updateInterval = setInterval(async () => {
+                await updateEmbed(channel, message.id, prize);
+                // Stop the interval after rain ends
+                if (!rain.active) {
+                    clearInterval(updateInterval);
+                }
+            }, 1500);
         } else if (!rain.active && messageSent) {
             writeStorage({
                 currentRainId,
@@ -162,8 +168,8 @@ async function updateEmbed(channel, messageId, totalPrize) {
             const message = await channel.messages.fetch(messageId);
             const embed = message.embeds[0];
 
-            embed.fields[1].value = `${participants.toLocaleString()}`;
-            embed.fields[2].value = `⏣${robuxPerPlayer}`;
+            embed.fields[1].value = ${participants.toLocaleString()};
+            embed.fields[2].value = ⏣${robuxPerPlayer};
 
             await message.edit({ embeds: [embed] });
         }
@@ -174,7 +180,7 @@ async function updateEmbed(channel, messageId, totalPrize) {
 
 // Event when the bot is ready
 client.on('ready', () => {
-    console.log(`Logged in as ${client.user.tag}`);
+    console.log(Logged in as ${client.user.tag});
     setInterval(checkRain, 5000);
     checkRain();
 });
