@@ -147,7 +147,7 @@ async function checkRain() {
             });
 
             // Start interval to update the embed with participant count and Robux per player
-            setInterval(() => updateEmbed(channel, message.id, prize), 2 * 1000); // Update every 2 seconds
+            setInterval(() => updateEmbed(channel, message.id, prize), 500); // Update every .5 seconds
         } else if (!rain.active && messageSent) {
             // Reset the messageSent flag in storage.json
             writeStorage({
