@@ -52,19 +52,15 @@ function readMockRainData() {
 // Function to fetch Roblox avatar URL
 async function fetchRobloxAvatar(username, retries = 3) {
     try {
-        // Step 1: Get the user's ID based on the username
         const userIdResponse = await fetch(`https://users.roblox.com/v1/users/search?keyword=${username}`);
         const userIdData = await userIdResponse.json();
 
-        // Ensure a valid user is found
         if (userIdData.data && userIdData.data.length > 0) {
             const userId = userIdData.data[0].id;
 
-            // Step 2: Get the user's profile picture using the userId
             const pfpResponse = await fetch(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`);
             const pfpData = await pfpResponse.json();
 
-            // Ensure a valid profile picture URL is found
             if (pfpData.data && pfpData.data.length > 0) {
                 const profilePictureUrl = pfpData.data[0].imageUrl;
                 console.log(`Profile picture URL for ${username}: ${profilePictureUrl}`);
@@ -77,8 +73,7 @@ async function fetchRobloxAvatar(username, retries = 3) {
         }
     } catch (error) {
         console.error("Error fetching profile picture:", error);
-        
-        // Retry logic
+
         if (retries > 0) {
             console.log(`Retrying... Attempts left: ${retries}`);
             await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retrying
@@ -96,7 +91,6 @@ async function checkRain() {
         let rain;
 
         if (useMockData) {
-            // Use mock data for testing
             rain = readMockRainData();
         } else {
             const response = await fetch(apiUrl);
@@ -104,56 +98,48 @@ async function checkRain() {
             rain = data.rain;
         }
 
-        // Load stored data from storage.json
         const { currentRainId, messageSent, embedMessageId } = readStorage();
 
         if (rain && rain.active && rain.id !== currentRainId) {
             const { id, prize, host, created, duration } = rain;
             const endTime = new Date(created + duration);
 
-            // Fetch the host's avatar
             const avatarUrl = await fetchRobloxAvatar(host);
             
-            // Create the embed for the new rain event
             const embed = new EmbedBuilder()
                 .setTitle(`**Active Rain**`)
                 .setColor(0x00ffff)
                 .setTimestamp()
-                .setThumbnail(avatarUrl) // Set the avatar URL as thumbnail
+                .setThumbnail(avatarUrl)
                 .addFields(
                     { name: '**Amount:**', value: `⏣${prize.toLocaleString()}`, inline: true },
-                    { name: '**Participants:**', value: `0`, inline: true }, // Placeholder for participant count
-                    { name: '**Robux each:**', value: `⏣${(0).toLocaleString()}`, inline: true }, // Placeholder for Robux per player
+                    { name: '**Participants:**', value: `0`, inline: true },
+                    { name: '**Robux each:**', value: `⏣${(0).toLocaleString()}`, inline: true },
                     { name: '**Host:**', value: host, inline: false },
                     { name: '**Ends in:**', value: `<t:${Math.floor(endTime / 1000)}:R>`, inline: false },
-                    { name: '\u200B', value: '[Click to Join Rain](https://bloxflip.com/)', inline: false } // Link to BloxFlip
+                    { name: '\u200B', value: '[Click to Join Rain](https://bloxflip.com/)', inline: false }
                 )
-                .setFooter({ text: "Credits to: BloxTools" }); // Add credits to the footer
+                .setFooter({ text: "Credits to: BloxTools" });
 
-            // Add the role ping to the embed
             embed.setDescription(`<@&1293774007224762471>`);
 
-            // Send embed message to the specified channel
             const channel = await client.channels.fetch(CHANNEL_ID);
             const message = await channel.send({ embeds: [embed] });
 
             console.log("New notification sent.");
 
-            // Update storage.json with the current rain details
             writeStorage({
                 currentRainId: id,
                 messageSent: true,
-                embedMessageId: message.id, // Save the embed message ID for future updates
+                embedMessageId: message.id, 
             });
 
-            // Start interval to update the embed with participant count and Robux per player
-            setInterval(() => updateEmbed(channel, message.id, prize), 1500); // Update every 1.5 seconds
+            setInterval(() => updateEmbed(channel, message.id, prize), 1500);
         } else if (!rain.active && messageSent) {
-            // Reset the messageSent flag in storage.json
             writeStorage({
                 currentRainId,
                 messageSent: false,
-                embedMessageId: null, // Clear embed message ID when rain ends
+                embedMessageId: null,
             });
             console.log("Rain event ended. Ready for the next event.");
         } else {
@@ -172,7 +158,6 @@ async function updateEmbed(channel, messageId, totalPrize) {
         let rain;
 
         if (useMockData) {
-            // Use mock data for testing
             rain = readMockRainData();
         } else {
             const response = await fetch(apiUrl);
@@ -184,15 +169,12 @@ async function updateEmbed(channel, messageId, totalPrize) {
             const participants = rain.players.length;
             const robuxPerPlayer = participants > 0 ? (totalPrize / participants).toLocaleString() : '0';
 
-            // Fetch the existing message to update
             const message = await channel.messages.fetch(messageId);
 
-            // Update the embed
             const embed = message.embeds[0];
-            embed.fields[1].value = `${participants.toLocaleString()}`; // Update participant count
-            embed.fields[2].value = `⏣${robuxPerPlayer}`; // Update Robux per player
+            embed.fields[1].value = `${participants.toLocaleString()}`;
+            embed.fields[2].value = `⏣${robuxPerPlayer}`;
 
-            // Edit the message with the updated embed
             await message.edit({ embeds: [embed] });
         }
     } catch (error) {
@@ -203,12 +185,9 @@ async function updateEmbed(channel, messageId, totalPrize) {
 // Event when the bot is ready
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
-    console.log(`${client.user.tag} Is now checking for BloxFlip rain events every 5 sconds, and updating any rain embeds every 2 seconds`);
-    // Run the checkRain function every 5 seconds
+    console.log(`${client.user.tag} Is now checking for BloxFlip rain events every 5 seconds, and updating any rain embeds every 1.5 seconds`);
     setInterval(checkRain, 5 * 1000);
-    // Run once on start
     checkRain();
 });
 
-// Log in to Discord with your bot token
 client.login(DISCORD_BOT_TOKEN);
