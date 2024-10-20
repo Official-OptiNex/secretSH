@@ -132,6 +132,7 @@ async function checkRain() {
 
             // Send embed message to the specified channel
             const channel = await client.channels.fetch(CHANNEL_ID);
+            await channel.send(`<@&1293774007224762471>`); // Ping the role
             const message = await channel.send({ embeds: [embed] });
 
             console.log("New notification sent.");
