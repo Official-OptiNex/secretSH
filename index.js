@@ -29,6 +29,21 @@ function readStorage() {
     }
 }
 
+function readMockRainData() {
+    try {
+        const data = fs.readFileSync("mockrain.json");
+        const mockData = JSON.parse(data);
+
+        // Automatically set the 'created' timestamp to the current time
+        mockData.created = Date.now(); // Set to current time in milliseconds
+
+        return mockData;
+    } catch (error) {
+        console.error("Error reading mock rain data:", error);
+        return null;
+    }
+}
+
 function writeStorage(data) {
     fs.writeFileSync("storage.json", JSON.stringify(data));
 }
@@ -111,9 +126,10 @@ async function checkRain() {
                             value: `<t:${endTimeInSeconds}:R>`,  // Discord will handle the countdown
                             inline: true 
                         },
+			{ name: 'Link', value: '[Click to Join Rain](https://bloxflip.com)', inline: false }  // Add link as a field
                     )
-                    .setFooter({ text: "Credits to: BloxBetting" });
-
+                    .setFooter({ text: "Credits to: BloxBetting" })
+                    
                 // Fetch the channel
                 const channel = await client.channels.fetch(CHANNEL_ID);
                 
