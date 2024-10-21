@@ -139,7 +139,7 @@ async function checkRain() {
                 // Send the embed message
                 await channel.send({ embeds: [embed] });
 
-                console.log("New rain event notification sent.");
+                //console.log("New rain event notification sent.");
 
                 // Update storage.json with the current rain details
                 writeStorage({
