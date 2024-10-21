@@ -33,19 +33,6 @@ function writeStorage(data) {
     fs.writeFileSync("storage.json", JSON.stringify(data));
 }
 
-// Function to read mock rain data from mockrain.json
-function readMockRainData() {
-    try {
-        const data = fs.readFileSync("mockrain.json");
-        const mockData = JSON.parse(data);
-        mockData.created = Date.now(); // Set to current time in milliseconds
-        return mockData;
-    } catch (error) {
-        console.error("Error reading mock rain data:", error);
-        return null;
-    }
-}
-
 // Function to fetch Roblox avatar URL
 async function fetchRobloxAvatar(username, retries = 3) {
     try {
@@ -102,7 +89,7 @@ async function checkRain() {
             if (rain.id !== currentRainId) {
                 // A new rain event is detected
                 const { id, prize, host, created, duration } = rain;
-                const endTime = new Date(created + duration);
+                const endTime = Math.floor((created + duration) / 1000); // Convert to seconds (Discord timestamps expect seconds)
 
                 // Fetch the host's avatar
                 const avatarUrl = await fetchRobloxAvatar(host);
@@ -114,9 +101,9 @@ async function checkRain() {
                     .setTimestamp()
                     .setThumbnail(avatarUrl)
                     .addFields(
-                        { name: 'Username', value: host, inline: true },
-                        { name: 'Rain Amount', value: `⏣ ${prize.toLocaleString()}`, inline: true },
-                        { name: 'Expiration', value: `${Math.floor(duration / 60)} minutes`, inline: true },
+                        { name: 'Host', value: host, inline: true },
+                        { name: 'Amount', value: `⏣ ${prize.toLocaleString()}`, inline: true },
+                        { name: 'Ends in', value: `<t:${endTime}:R>`, inline: true }, // Discord's relative time feature
                     )
                     .setFooter({ text: "Credits to: BloxBetting" });
 
