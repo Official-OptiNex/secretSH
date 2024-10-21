@@ -75,7 +75,7 @@ async function checkRain() {
         let rain;
 
         if (useMockData) {
-            rain = readMockRainData();
+            rain = readMockRainData();  // If using mock data, you should have a function to load it
         } else {
             const response = await fetch(apiUrl);
             const data = await response.json();
@@ -89,7 +89,10 @@ async function checkRain() {
             if (rain.id !== currentRainId) {
                 // A new rain event is detected
                 const { id, prize, host, created, duration } = rain;
-                const endTime = Math.floor((created + duration) / 1000); // Convert to seconds (Discord timestamps expect seconds)
+                
+                // Calculate the end time of the rain event
+                const endTime = created + duration;
+                const endTimeInSeconds = Math.floor(endTime / 1000);  // Convert milliseconds to Unix seconds
 
                 // Fetch the host's avatar
                 const avatarUrl = await fetchRobloxAvatar(host);
@@ -98,17 +101,26 @@ async function checkRain() {
                 const embed = new EmbedBuilder()
                     .setTitle(`**Active Rain**`)
                     .setColor(0x00ffff)
-                    .setTimestamp()
+                    .setTimestamp()  // Discord's own timestamp for when the embed was created
                     .setThumbnail(avatarUrl)
                     .addFields(
                         { name: 'Host', value: host, inline: true },
                         { name: 'Amount', value: `⏣ ${prize.toLocaleString()}`, inline: true },
-                        { name: 'Ends in', value: `<t:${endTime}:R>`, inline: true }, // Discord's relative time feature
+                        { 
+                            name: 'Ends in', 
+                            value: `<t:${endTimeInSeconds}:R>`,  // Discord will handle the countdown
+                            inline: true 
+                        },
                     )
                     .setFooter({ text: "Credits to: BloxBetting" });
 
-                // Send embed message to the specified channel
+                // Fetch the channel
                 const channel = await client.channels.fetch(CHANNEL_ID);
+                
+                // Send a message mentioning the notification role before the embed
+                await channel.send(`<@&1297927023909539890>`);  // Mention the role
+                
+                // Send the embed message
                 await channel.send({ embeds: [embed] });
 
                 console.log("New rain event notification sent.");
