@@ -112,7 +112,8 @@ async function checkRain() {
                             inline: true 
                         },
                     )
-                    .setFooter({ text: "Credits to: BloxBetting" });
+                    .setFooter({ text: "Credits to: BloxBetting" })
+                    .setDescription('[Click to Join Rain](https://bloxflip.com)');  // Add hyperlink in description
 
                 // Fetch the channel
                 const channel = await client.channels.fetch(CHANNEL_ID);
