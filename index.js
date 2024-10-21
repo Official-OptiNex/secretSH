@@ -5,7 +5,7 @@ const keep_alive = require('./keep_alive.js');
 
 // Replace these with your actual values
 const DISCORD_BOT_TOKEN = process.env.TOKEN; // Access the bot token directly
-const CHANNEL_ID = process.env.CHANNEL; // Your channel ID here
+const CHANNEL_ID = '1297925947122651156'; // Your channel ID here
 
 // Toggle for using mock data
 const useMockData = false; // Set to true to use mock data 
