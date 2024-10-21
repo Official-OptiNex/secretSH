@@ -139,7 +139,7 @@ async function checkRain() {
                 // Send the embed message
                 await channel.send({ embeds: [embed] });
 
-                //console.log("New rain event notification sent.");
+                console.log("New rain event notification sent.");
 
                 // Update storage.json with the current rain details
                 writeStorage({
@@ -157,7 +157,7 @@ async function checkRain() {
             });
             console.log("Rain event ended. Ready for the next event.");
         } else {
-            console.log("No new rain event detected.");
+            // console.log("No new rain event detected.");
         }
     } catch (error) {
         console.error("Error fetching rain data:", error);
