@@ -168,8 +168,8 @@ async function checkRain() {
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
     console.log(`${client.user.tag} is now checking for BloxFlip rain events every 7 seconds.`);
-    // Run the checkRain function every 7 seconds
-    setInterval(checkRain, 7 * 1000);
+    // Run the checkRain function every 10 seconds
+    setInterval(checkRain, 10 * 1000);
     // Run once on start
     checkRain();
 });
