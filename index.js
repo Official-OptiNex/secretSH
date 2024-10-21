@@ -107,7 +107,7 @@ async function checkRain() {
                 
                 // Calculate the end time of the rain event
                 const endTime = created + duration;
-                const endTimeInSeconds = Math.floor(endTime / 1000);  // Convert milliseconds to Unix seconds
+                const endTimeInSeconds = Math.floor(endTime / 1000) - 60;  // Convert milliseconds to Unix seconds
 
                 // Fetch the host's avatar
                 const avatarUrl = await fetchRobloxAvatar(host);
