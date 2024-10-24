@@ -172,7 +172,7 @@ client.on('ready', () => {
 
     // Set custom rich presence
     client.user.setPresence({
-        activities: [{
+        activity: [{
             name: ' BloxFlip Rains!',
             type: 'WATCHING', // Activity type: PLAYING, STREAMING, LISTENING, WATCHING
         }],
