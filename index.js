@@ -165,14 +165,26 @@ async function checkRain() {
 }
 
 // Event when the bot is ready
+// Event when the bot is ready
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
-    console.log(`${client.user.tag} is now checking for BloxFlip rain events every 7 seconds.`);
+    console.log(`${client.user.tag} is now checking for BloxFlip rain events every 10 seconds.`);
+
+    // Set custom rich presence
+    client.user.setPresence({
+        activities: [{
+            name: ' BloxFlip Rains!',
+            type: 'WATCHING', // Activity type: PLAYING, STREAMING, LISTENING, WATCHING
+        }],
+        status: 'online', // Online status: online, idle, dnd (do not disturb), invisible
+    });
+
     // Run the checkRain function every 10 seconds
     setInterval(checkRain, 10 * 1000);
     // Run once on start
     checkRain();
 });
+
 
 // Log in to Discord with your bot token
 client.login(DISCORD_BOT_TOKEN);
