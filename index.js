@@ -1,6 +1,6 @@
 const fetch = require('node-fetch');
 const fs = require('fs');
-const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
+const { Client, GatewayIntentBits, EmbedBuilder, ActivityType } = require('discord.js');
 const keep_alive = require('./keep_alive.js');
 
 // Replace these with your actual values
@@ -165,14 +165,14 @@ async function checkRain() {
 }
 
 // Event when the bot is ready
-// Event when the bot is ready
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
     console.log(`${client.user.tag} is now checking for BloxFlip rain events every 10 seconds.`);
 
-    // Set custom rich presence
-// Set custom rich presence using setActivity()
-    client.user.setActivity('BlockFlip Rains!', { type: 'WATCHING' });
+    // Set custom rich presence with streaming activity
+    client.user.setActivity('BloxFlip Rains', { 
+        type: ActivityType.Watching // Watching activity type
+    });
 
     // Run the checkRain function every 10 seconds
     setInterval(checkRain, 10 * 1000);
