@@ -1,11 +1,12 @@
 const fetch = require('node-fetch');
 const fs = require('fs');
-const { Client, GatewayIntentBits, EmbedBuilder, ActivityType } = require('discord.js');
+const { Client, GatewayIntentBits, EmbedBuilder, ActivityType, REST, Routes } = require('discord.js');
 const keep_alive = require('./keep_alive.js');
 
 // Replace these with your actual values
 const DISCORD_BOT_TOKEN = process.env.TOKEN; // Access the bot token directly
 const CHANNEL_ID = process.env.CHANNEL; // Your channel ID here
+const GUILD_ID = process.env.GUILD_ID; // Your guild ID here for registering commands
 
 // Toggle for using mock data
 const useMockData = false; // Set to true to use mock data 
@@ -126,7 +127,7 @@ async function checkRain() {
                             value: `<t:${endTimeInSeconds}:R>`,  // Discord will handle the countdown
                             inline: true 
                         },
-			{ name: 'Link', value: '[Click to Join Rain](https://bloxflip.com)', inline: false }  // Add link as a field
+                        { name: 'Link', value: '[Click to Join Rain](https://bloxflip.com)', inline: false }  // Add link as a field
                     )
                     .setFooter({ text: "Credits to: BloxBetting" })
                     
@@ -164,6 +165,31 @@ async function checkRain() {
     }
 }
 
+// Function to register slash commands
+async function registerCommands() {
+    const commands = [
+        {
+            name: 'info',
+            description: 'Get information about the bot and its creator.',
+        },
+    ];
+
+    const rest = new REST({ version: '9' }).setToken(DISCORD_BOT_TOKEN);
+
+    try {
+        console.log('Started refreshing application (/) commands.');
+
+        await rest.put(
+            Routes.applicationGuildCommands(client.user.id, GUILD_ID),
+            { body: commands },
+        );
+
+        console.log('Successfully reloaded application (/) commands.');
+    } catch (error) {
+        console.error(error);
+    }
+}
+
 // Event when the bot is ready
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
@@ -174,12 +200,35 @@ client.on('ready', () => {
         type: ActivityType.Watching // Watching activity type
     });
 
+    // Register commands when the bot starts
+    registerCommands();
+
     // Run the checkRain function every 10 seconds
     setInterval(checkRain, 10 * 1000);
     // Run once on start
     checkRain();
 });
 
+// Handle interactions
+client.on('interactionCreate', async (interaction) => {
+    if (!interaction.isCommand()) return;
+
+    const { commandName } = interaction;
+
+    if (commandName === 'info') {
+        const embed = new EmbedBuilder()
+            .setTitle('Bot Information')
+            .setDescription('This bot monitors BloxFlip for active rain events and sends notifications with rain information.')
+            .addFields(
+                { name: 'Creator', value: '[BloxBetting](https://youtube.com/@BloxBetting)', inline: true },
+                { name: 'Purpose', value: 'To notify users about rain events on BloxFlip.', inline: true }
+            )
+            .setColor(0x00ffff)
+            .setTimestamp();
+
+        await interaction.reply({ embeds: [embed] });
+    }
+});
 
 // Log in to Discord with your bot token
 client.login(DISCORD_BOT_TOKEN);
