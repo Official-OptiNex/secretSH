@@ -171,13 +171,8 @@ client.on('ready', () => {
     console.log(`${client.user.tag} is now checking for BloxFlip rain events every 10 seconds.`);
 
     // Set custom rich presence
-    client.user.setPresence({
-        activity: [{
-            name: ' BloxFlip Rains!',
-            type: 'WATCHING', // Activity type: PLAYING, STREAMING, LISTENING, WATCHING
-        }],
-        status: 'online', // Online status: online, idle, dnd (do not disturb), invisible
-    });
+// Set custom rich presence using setActivity()
+    client.user.setActivity('BlockFlip Rains!', { type: 'WATCHING' });
 
     // Run the checkRain function every 10 seconds
     setInterval(checkRain, 10 * 1000);
