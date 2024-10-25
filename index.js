@@ -50,19 +50,39 @@ function writeStorage(data) {
 }
 
 // Function to fetch Roblox avatar URL
+// Function to fetch Roblox avatar URL
 async function fetchRobloxAvatar(username, retries = 3) {
     try {
-        const userIdResponse = await fetch(https://users.roblox.com/v1/users/search?keyword=${username});
+        // Fetch user ID with browser-like headers
+        const userIdResponse = await fetch(`https://users.roblox.com/v1/users/search?keyword=${username}`, {
+            headers: {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36",
+                "Accept": "application/json",
+                "Accept-Language": "en-US,en;q=0.5",
+                "Connection": "keep-alive",
+                "DNT": "1"
+            }
+        });
         const userIdData = await userIdResponse.json();
         
         if (userIdData.data && userIdData.data.length > 0) {
             const userId = userIdData.data[0].id;
-            const pfpResponse = await fetch(https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false);
+
+            // Fetch profile picture URL with browser-like headers
+            const pfpResponse = await fetch(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`, {
+                headers: {
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36",
+                    "Accept": "application/json",
+                    "Accept-Language": "en-US,en;q=0.5",
+                    "Connection": "keep-alive",
+                    "DNT": "1"
+                }
+            });
             const pfpData = await pfpResponse.json();
 
             if (pfpData.data && pfpData.data.length > 0) {
                 const profilePictureUrl = pfpData.data[0].imageUrl;
-                console.log(Profile picture URL for ${username}: ${profilePictureUrl});
+                console.log(`Profile picture URL for ${username}: ${profilePictureUrl}`);
                 return profilePictureUrl;
             } else {
                 console.error("Failed to retrieve profile picture.");
@@ -75,13 +95,14 @@ async function fetchRobloxAvatar(username, retries = 3) {
         
         // Retry logic
         if (retries > 0) {
-            console.log(Retrying... Attempts left: ${retries});
+            console.log(`Retrying... Attempts left: ${retries}`);
             await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retrying
             return fetchRobloxAvatar(username, retries - 1);
         }
     }
     return null; // Return null if user is not found after retries
 }
+
 
 // Function to check for rain events
 // Function to check for rain events
