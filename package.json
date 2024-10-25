@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "discord.js": "^14.16.3",
-    "cloudscraper": "^4.8.0"
+  "discord.js": "^14.16.3",
+  "cloudscraper": "latest"
   }
 }
