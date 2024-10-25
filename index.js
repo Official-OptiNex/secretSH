@@ -224,8 +224,8 @@ async function registerCommands() {
 
 // Event when the bot is ready
 client.on('ready', () => {
-    console.log(Logged in as ${client.user.tag});
-    console.log(${client.user.tag} is now checking for BloxFlip rain events every 10 seconds.);
+    console.log('Logged in as ${client.user.tag}');
+    console.log('${client.user.tag} is now checking for BloxFlip rain events every 10 seconds.');
 
     // Set custom rich presence with streaming activity
     client.user.setActivity('BloxFlip Rains', { 
