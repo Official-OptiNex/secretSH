@@ -96,12 +96,12 @@ async function checkRain() {
             const response = await fetch(apiUrl);
             const contentType = response.headers.get("content-type");
 
-            // Check if the response is JSON
+            // Log the response body if it's not JSON
             if (contentType && contentType.includes("application/json")) {
                 const data = await response.json();
-                
-                // Log the full response structure for debugging
-                console.log("API response data:", JSON.stringify(data, null, 2));
+
+                // Log the full JSON structure for debugging
+                console.log("API JSON response:", JSON.stringify(data, null, 2));
 
                 // Confirm the 'rain' field exists within the JSON structure
                 if (data && data.rain) {
@@ -111,7 +111,9 @@ async function checkRain() {
                     return;
                 }
             } else {
-                console.error("Received non-JSON response from the API.");
+                // Log the entire response text if it's not JSON
+                const responseText = await response.text();
+                console.error("Received non-JSON response from the API:", responseText);
                 return;
             }
         }
@@ -123,7 +125,7 @@ async function checkRain() {
             if (rain.id !== currentRainId) {
                 // New rain event detected
                 const { id, prize, host, created, duration } = rain;
-                
+
                 // Calculate end time of the rain event
                 const endTime = created + duration;
                 const endTimeInSeconds = Math.floor(endTime / 1000) - 60;  // Convert to Unix time in seconds
@@ -148,7 +150,7 @@ async function checkRain() {
                         { name: 'Link', value: '[Click to Join Rain](https://bloxflip.com)', inline: false }
                     )
                     .setFooter({ text: "Credits to: BloxBetting" });
-                
+
                 // Fetch the channel
                 const channel = await client.channels.fetch(CHANNEL_ID);
 
