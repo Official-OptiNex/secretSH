@@ -86,8 +86,10 @@ async function fetchRobloxAvatar(username, retries = 3) {
 // Function to check for rain events
 async function checkRain() {
     const apiUrl = "https://api.bloxflip.com/chat/history";
+
     try {
         let rain;
+
         if (useMockData) {
             rain = readMockRainData();
         } else {
@@ -97,23 +99,34 @@ async function checkRain() {
             // Check if the response is JSON
             if (contentType && contentType.includes("application/json")) {
                 const data = await response.json();
-                rain = data.rain;
+                
+                // Log the full response structure for debugging
+                console.log("API response data:", JSON.stringify(data, null, 2));
+
+                // Confirm the 'rain' field exists within the JSON structure
+                if (data && data.rain) {
+                    rain = data.rain;
+                } else {
+                    console.error("The 'rain' field is missing in the API response.");
+                    return;
+                }
             } else {
                 console.error("Received non-JSON response from the API.");
                 return;
             }
         }
+
         // Load stored data from storage.json
         const { currentRainId, messageSent } = readStorage();
 
         if (rain && rain.active) {
             if (rain.id !== currentRainId) {
-                // A new rain event is detected
+                // New rain event detected
                 const { id, prize, host, created, duration } = rain;
                 
-                // Calculate the end time of the rain event
+                // Calculate end time of the rain event
                 const endTime = created + duration;
-                const endTimeInSeconds = Math.floor(endTime / 1000) - 60;  // Convert milliseconds to Unix seconds
+                const endTimeInSeconds = Math.floor(endTime / 1000) - 60;  // Convert to Unix time in seconds
 
                 // Fetch the host's avatar
                 const avatarUrl = await fetchRobloxAvatar(host);
@@ -122,7 +135,7 @@ async function checkRain() {
                 const embed = new EmbedBuilder()
                     .setTitle(`**Active Rain**`)
                     .setColor(0x00ffff)
-                    .setTimestamp()  // Discord's own timestamp for when the embed was created
+                    .setTimestamp()
                     .setThumbnail(avatarUrl)
                     .addFields(
                         { name: 'Host', value: host, inline: true },
@@ -132,13 +145,13 @@ async function checkRain() {
                             value: `<t:${endTimeInSeconds}:R>`,  // Discord will handle the countdown
                             inline: true 
                         },
-                        { name: 'Link', value: '[Click to Join Rain](https://bloxflip.com)', inline: false }  // Add link as a field
+                        { name: 'Link', value: '[Click to Join Rain](https://bloxflip.com)', inline: false }
                     )
-                    .setFooter({ text: "Credits to: BloxBetting" })
-                    
+                    .setFooter({ text: "Credits to: BloxBetting" });
+                
                 // Fetch the channel
                 const channel = await client.channels.fetch(CHANNEL_ID);
-                
+
                 // Send a message mentioning the notification role before the embed
                 await channel.send(`<@&1297927023909539890>`);  // Mention the role
                 
@@ -162,13 +175,12 @@ async function checkRain() {
                 embedMessageId: null, // Clear embed message ID when rain ends
             });
             console.log("Rain event ended. Ready for the next event.");
-        } else {
-            // console.log("No new rain event detected.");
         }
     } catch (error) {
         console.error("Error fetching rain data:", error);
     }
 }
+
 
 // Function to register slash commands
 async function registerCommands() {
