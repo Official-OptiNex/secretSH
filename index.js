@@ -86,18 +86,23 @@ async function fetchRobloxAvatar(username, retries = 3) {
 // Function to check for rain events
 async function checkRain() {
     const apiUrl = "https://api.bloxflip.com/chat/history";
-
     try {
         let rain;
-
         if (useMockData) {
-            rain = readMockRainData();  // If using mock data, you should have a function to load it
+            rain = readMockRainData();
         } else {
             const response = await fetch(apiUrl);
-            const data = await response.json();
-            rain = data.rain;
-        }
+            const contentType = response.headers.get("content-type");
 
+            // Check if the response is JSON
+            if (contentType && contentType.includes("application/json")) {
+                const data = await response.json();
+                rain = data.rain;
+            } else {
+                console.error("Received non-JSON response from the API.");
+                return;
+            }
+        }
         // Load stored data from storage.json
         const { currentRainId, messageSent } = readStorage();
 
