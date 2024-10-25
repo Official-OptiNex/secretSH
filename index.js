@@ -1,22 +1,20 @@
-const fetch = require('node-fetch');
+const cloudscraper = require('cloudscraper');
 const fs = require('fs');
 const { Client, GatewayIntentBits, EmbedBuilder, ActivityType, REST, Routes } = require('discord.js');
 const keep_alive = require('./keep_alive.js');
 
 // Replace these with your actual values
-const DISCORD_BOT_TOKEN = process.env.TOKEN; // Access the bot token directly
-const CHANNEL_ID = process.env.CHANNEL; // Your channel ID here
-const GUILD_ID = process.env.GUILD_ID; // Your guild ID here for registering commands
+const DISCORD_BOT_TOKEN = process.env.TOKEN;
+const CHANNEL_ID = process.env.CHANNEL;
+const GUILD_ID = process.env.GUILD_ID;
 
-// Toggle for using mock data
-const useMockData = false; // Set to true to use mock data 
+const useMockData = false;
 
 // Initialize Discord client
 const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
 });
 
-// Function to read and write data to a file for storage purposes
 function readStorage() {
     try {
         const data = fs.readFileSync("storage.json");
@@ -25,7 +23,7 @@ function readStorage() {
         return {
             currentRainId: null,
             messageSent: false,
-            embedMessageId: null, // Store the embed message ID
+            embedMessageId: null,
         };
     }
 }
@@ -34,10 +32,7 @@ function readMockRainData() {
     try {
         const data = fs.readFileSync("mockrain.json");
         const mockData = JSON.parse(data);
-
-        // Automatically set the 'created' timestamp to the current time
-        mockData.created = Date.now(); // Set to current time in milliseconds
-
+        mockData.created = Date.now();
         return mockData;
     } catch (error) {
         console.error("Error reading mock rain data:", error);
@@ -49,16 +44,15 @@ function writeStorage(data) {
     fs.writeFileSync("storage.json", JSON.stringify(data));
 }
 
-// Function to fetch Roblox avatar URL
 async function fetchRobloxAvatar(username, retries = 3) {
     try {
-        const userIdResponse = await fetch(`https://users.roblox.com/v1/users/search?keyword=${username}`);
-        const userIdData = await userIdResponse.json();
+        const userIdResponse = await cloudscraper.get(`https://users.roblox.com/v1/users/search?keyword=${username}`);
+        const userIdData = JSON.parse(userIdResponse);
         
         if (userIdData.data && userIdData.data.length > 0) {
             const userId = userIdData.data[0].id;
-            const pfpResponse = await fetch(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`);
-            const pfpData = await pfpResponse.json();
+            const pfpResponse = await cloudscraper.get(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`);
+            const pfpData = JSON.parse(pfpResponse);
 
             if (pfpData.data && pfpData.data.length > 0) {
                 const profilePictureUrl = pfpData.data[0].imageUrl;
@@ -73,17 +67,15 @@ async function fetchRobloxAvatar(username, retries = 3) {
     } catch (error) {
         console.error("Error fetching profile picture:", error);
         
-        // Retry logic
         if (retries > 0) {
             console.log(`Retrying... Attempts left: ${retries}`);
-            await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retrying
+            await new Promise(resolve => setTimeout(resolve, 1000));
             return fetchRobloxAvatar(username, retries - 1);
         }
     }
-    return null; // Return null if user is not found after retries
+    return null;
 }
 
-// Function to check for rain events
 async function checkRain() {
     const apiUrl = "https://api.bloxflip.com/chat/history";
 
@@ -93,47 +85,22 @@ async function checkRain() {
         if (useMockData) {
             rain = readMockRainData();
         } else {
-            const response = await fetch(apiUrl);
-            const contentType = response.headers.get("content-type");
-
-            // Log the response body if it's not JSON
-            if (contentType && contentType.includes("application/json")) {
-                const data = await response.json();
-
-                // Log the full JSON structure for debugging
-                console.log("API JSON response:", JSON.stringify(data, null, 2));
-
-                // Confirm the 'rain' field exists within the JSON structure
-                if (data && data.rain) {
-                    rain = data.rain;
-                } else {
-                    console.error("The 'rain' field is missing in the API response.");
-                    return;
-                }
-            } else {
-                // Log the entire response text if it's not JSON
-                const responseText = await response.text();
-                console.error("Received non-JSON response from the API:", responseText);
-                return;
-            }
+            const response = await cloudscraper.get(apiUrl);
+            const data = JSON.parse(response);
+            rain = data.rain;
         }
 
-        // Load stored data from storage.json
         const { currentRainId, messageSent } = readStorage();
 
         if (rain && rain.active) {
             if (rain.id !== currentRainId) {
-                // New rain event detected
                 const { id, prize, host, created, duration } = rain;
-
-                // Calculate end time of the rain event
+                
                 const endTime = created + duration;
-                const endTimeInSeconds = Math.floor(endTime / 1000) - 60;  // Convert to Unix time in seconds
+                const endTimeInSeconds = Math.floor(endTime / 1000) - 60;
 
-                // Fetch the host's avatar
                 const avatarUrl = await fetchRobloxAvatar(host);
 
-                // Create the embed for the new rain event
                 const embed = new EmbedBuilder()
                     .setTitle(`**Active Rain**`)
                     .setColor(0x00ffff)
@@ -144,47 +111,41 @@ async function checkRain() {
                         { name: 'Amount', value: `⏣ ${prize.toLocaleString()}`, inline: true },
                         { 
                             name: 'Ends in', 
-                            value: `<t:${endTimeInSeconds}:R>`,  // Discord will handle the countdown
+                            value: `<t:${endTimeInSeconds}:R>`,
                             inline: true 
                         },
                         { name: 'Link', value: '[Click to Join Rain](https://bloxflip.com)', inline: false }
                     )
                     .setFooter({ text: "Credits to: BloxBetting" });
-
-                // Fetch the channel
+                    
                 const channel = await client.channels.fetch(CHANNEL_ID);
-
-                // Send a message mentioning the notification role before the embed
-                await channel.send(`<@&1297927023909539890>`);  // Mention the role
                 
-                // Send the embed message
+                await channel.send(`<@&1297927023909539890>`);
                 await channel.send({ embeds: [embed] });
 
                 console.log("New rain event notification sent.");
 
-                // Update storage.json with the current rain details
                 writeStorage({
                     currentRainId: id,
                     messageSent: true,
-                    embedMessageId: null, // No longer tracking message IDs
+                    embedMessageId: null,
                 });
             }
         } else if (!rain.active && messageSent) {
-            // Reset the messageSent flag in storage.json
             writeStorage({
                 currentRainId: null,
                 messageSent: false,
-                embedMessageId: null, // Clear embed message ID when rain ends
+                embedMessageId: null,
             });
             console.log("Rain event ended. Ready for the next event.");
+        } else {
+            // console.log("No new rain event detected.");
         }
     } catch (error) {
         console.error("Error fetching rain data:", error);
     }
 }
 
-
-// Function to register slash commands
 async function registerCommands() {
     const commands = [
         {
@@ -209,26 +170,20 @@ async function registerCommands() {
     }
 }
 
-// Event when the bot is ready
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
     console.log(`${client.user.tag} is now checking for BloxFlip rain events every 10 seconds.`);
 
-    // Set custom rich presence with streaming activity
     client.user.setActivity('BloxFlip Rains', { 
-        type: ActivityType.Watching // Watching activity type
+        type: ActivityType.Watching 
     });
 
-    // Register commands when the bot starts
     registerCommands();
 
-    // Run the checkRain function every 10 seconds
     setInterval(checkRain, 10 * 1000);
-    // Run once on start
     checkRain();
 });
 
-// Handle interactions
 client.on('interactionCreate', async (interaction) => {
     if (!interaction.isCommand()) return;
 
@@ -249,5 +204,4 @@ client.on('interactionCreate', async (interaction) => {
     }
 });
 
-// Log in to Discord with your bot token
 client.login(DISCORD_BOT_TOKEN);
